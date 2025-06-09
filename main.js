@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1736,6 +1736,67 @@ scene.add(ambientLight);
 // Camera position
 camera.position.set(-550, 1200, 0);
 
+
+const skyboxLoader = new THREE.CubeTextureLoader();
+const skyboxTexture = skyboxLoader.load([
+    'skybox/cubemap_0.png', // positive X
+    'skybox/cubemap_1.png', // negative X
+    'skybox/cubemap_2.png', // positive Y
+    'skybox/cubemap_3.png', // negative Y
+    'skybox/cubemap_4.png', // positive Z
+    'skybox/cubemap_5.png', // negative Z
+]);
+scene.background = skyboxTexture;
+
+
+// Create a pivot for the sun's orbit
+const sunPivot = new THREE.Object3D();
+scene.add(sunPivot);
+
+// Tilt the orbit (e.g. 30 degrees around X)
+const orbitTilt = THREE.MathUtils.degToRad(30);
+sunPivot.rotation.x = orbitTilt;
+
+// Optionally, rotate the orbit around Y for precession
+const orbitPrecession = THREE.MathUtils.degToRad(20); // e.g. 20 degrees
+sunPivot.rotation.y = orbitPrecession;
+
+// Create the sun mesh (a glowing yellow sphere)
+const sunRadius = 40;
+const sunGeometry = new THREE.SphereGeometry(sunRadius, 32, 32);
+const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffee88, emissive: 0xffff99 });
+const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+
+// Add a glow effect using a sprite (optional, for extra glow)
+const sunGlowTexture = new THREE.TextureLoader().load('textures/glow.png'); // Use a radial glow texture
+const sunGlowMaterial = new THREE.SpriteMaterial({
+    map: sunGlowTexture,
+    color: 0xffee88,
+    transparent: true,
+    opacity: 0.7,
+    depthWrite: false
+});
+const sunGlow = new THREE.Sprite(sunGlowMaterial);
+sunGlow.scale.set(sunRadius * 6, sunRadius * 6, 1);
+sunMesh.add(sunGlow);
+
+// Set initial position of the sun (distance from center)
+const sunDistance = 3500;
+sunMesh.position.set(sunDistance, 0, 0);
+sunPivot.add(sunMesh);
+
+// Create a strong PointLight at the sun's position
+const sunPointLight = new THREE.PointLight(0xfff7b2, 2.5, 10000, 2);
+unPointLight.castShadow = true;
+sunPointLight.shadow.mapSize.width = 4096; // Higher resolution
+sunPointLight.shadow.mapSize.height = 4096;
+sunPointLight.shadow.bias = -0.0001; // Reduce shadow acne
+sunPointLight.shadow.radius = 8; // Softer edges
+sunMesh.add(sunPointLight); // Attach light to sun mesh so it moves with the sun
+
+
+
+
 function animate() {
     //NGUYEN_LE_TRUNG_HIEU
     const now = new Date();
@@ -1804,6 +1865,12 @@ function animate() {
         const nextPos2 = carSpline.getPointAt((t + 0.51) % 1); // Offset by 0.01 for next position
         flyingCars[1].position.set(pos2.x, 600 + Math.cos(angle2) * 24, pos2.z);
         flyingCars[1].lookAt(nextPos2.x, flyingCars[1].position.y, nextPos2.z);
+
+
+        // Animate the sun's orbit (one full rotation per 60 seconds)
+        const sunOrbitSpeed = (2 * Math.PI) / (60*3); // radians per second
+        const elapsed = performance.now() * 0.001; // seconds
+        sunPivot.rotation.z = elapsed * sunOrbitSpeed;
     }
 }
 
