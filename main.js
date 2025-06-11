@@ -65,6 +65,7 @@ roadTexture.wrapT = THREE.RepeatWrapping;
 roadTexture.repeat.set(.8, 5);
 
 // Modeling
+// GROUND & ROADS
 // Create ground
 const groundGeometry = new THREE.BoxGeometry(1200, 1200, 10);
 const groundMaterial = new THREE.MeshStandardMaterial({
@@ -73,6 +74,7 @@ const groundMaterial = new THREE.MeshStandardMaterial({
 });
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
 scene.add(ground);
 
 // create a road
@@ -81,19 +83,21 @@ const roadMaterial = new THREE.MeshStandardMaterial({
     color: 0x333333, // Dark gray
     side: THREE.DoubleSide
     });
-
-
 const road1 = new THREE.Mesh(roadGeometry, roadMaterial);
 road1.rotation.x = -Math.PI / 2;
 road1.position.y = 0.01; // Slightly above the ground to avoid z-fighting
+road1.castShadow = true;
+road1.receiveShadow = true;
 scene.add(road1);
 
 const road2 = new THREE.Mesh(roadGeometry, roadMaterial);
 road2.rotation.set(-Math.PI / 2, 0, Math.PI / 2)
 road2.position.y = 0.01; // Slightly above the ground to avoid z-fighting
+road2.castShadow = true;
+road2.receiveShadow = true;
 scene.add(road2);
 
-//add a building in the center
+// Add a building in the center
 const hieu_group = new THREE.Group();
 scene.add(hieu_group);
 hieu_group.position.set(-350, 0, -350);
@@ -269,6 +273,8 @@ hieu_group.add(building1_group);
 building1_group.position.set(100, 0, -100);
 
 const building1_body = createBox(0x9e9e9e, [100, 300, 302], [0, 100, 0], [0, 0, 0], bricksTexture1);
+building1_body.castShadow = true;
+building1_body.receiveShadow = true;
 building1_group.add(building1_body);
 
 const building1_body_outside_column1 = createBox(0x8b0000, [10, 300, 10], [50, 100, 80], [0, 0, 0], concreteTexture);
@@ -355,6 +361,9 @@ function createBox(color, size, position, rotation, textureMap = null) {
         THREE.MathUtils.degToRad(rotation[2])
     );
 
+    box.castShadow = true;
+    box.receiveShadow = true;
+
     return box;
 }
 
@@ -380,6 +389,9 @@ function createCone(color, baseRadius, height, segments, position, rotation, tex
         THREE.MathUtils.degToRad(rotation[1]),
         THREE.MathUtils.degToRad(rotation[2])
     );
+
+    cone.castShadow = true;
+    cone.receiveShadow = true;
 
     return cone;
 }
@@ -457,6 +469,9 @@ function createTriangularRoof(color, width, height, length, position, rotation, 
         THREE.MathUtils.degToRad(rotation[2])
     );
 
+    roof.castShadow = true;
+    roof.receiveShadow = true;
+
     return roof;
 }
 
@@ -482,6 +497,9 @@ function createCylinder(color, radius, thickness, segments, position, rotation, 
         THREE.MathUtils.degToRad(rotation[1]),
         THREE.MathUtils.degToRad(rotation[2])
     );
+
+    cylinder.castShadow = true;
+    cylinder.receiveShadow = true;
 
     return cylinder;
 }
@@ -1762,10 +1780,9 @@ const orbitPrecession = THREE.MathUtils.degToRad(20); // e.g. 20 degrees
 sunPivot.rotation.y = orbitPrecession;
 
 // Create the sun mesh (a glowing yellow sphere)
-const sunRadius = 40;
+const sunRadius = 80;
 const sunGeometry = new THREE.SphereGeometry(sunRadius, 32, 32);
-const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffee88, emissive: 0xffff99 });
-const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffee88 });const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
 
 // Add a glow effect using a sprite (optional, for extra glow)
 const sunGlowTexture = new THREE.TextureLoader().load('textures/glow.png'); // Use a radial glow texture
@@ -1787,8 +1804,7 @@ sunPivot.add(sunMesh);
 
 // Create a strong PointLight at the sun's position
 const sunPointLight = new THREE.PointLight(0xfff7b2, 2.5, 10000, 2);
-unPointLight.castShadow = true;
-sunPointLight.shadow.mapSize.width = 4096; // Higher resolution
+sunPointLight.castShadow = true;sunPointLight.shadow.mapSize.width = 4096; // Higher resolution
 sunPointLight.shadow.mapSize.height = 4096;
 sunPointLight.shadow.bias = -0.0001; // Reduce shadow acne
 sunPointLight.shadow.radius = 8; // Softer edges
