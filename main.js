@@ -1502,9 +1502,10 @@ islandLoader.load('island2.glb', function(gltf) {
     });
     scene.add(island);
 });
-const axisHelper = new THREE.AxesHelper(300); // Size 300, adjust as needed
-axisHelper.position.y = 50;
-scene.add(axisHelper);
+
+// const axisHelper = new THREE.AxesHelper(300); // Size 300, adjust as needed
+// axisHelper.position.y = 50;
+// scene.add(axisHelper);
 
 //TA_MINH_DUC
 // City base position
