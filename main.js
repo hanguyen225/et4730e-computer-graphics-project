@@ -1488,6 +1488,24 @@ for (let i = 0; i < 2; i++) {
 // Thêm vào helicopter
 heli.add(tailRotorGroup);
 
+// Load the floating island model
+const islandLoader = new GLTFLoader();
+islandLoader.load('island2.glb', function(gltf) {
+    const island = gltf.scene;
+    island.position.set(10, -25, -200); // Adjust Y to be below your main area
+    island.scale.set(280, 280, 280);      // Adjust scale as needed
+    island.traverse(child => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
+    scene.add(island);
+});
+const axisHelper = new THREE.AxesHelper(300); // Size 300, adjust as needed
+axisHelper.position.y = 50;
+scene.add(axisHelper);
+
 //TA_MINH_DUC
 // City base position
 const basePos = new THREE.Vector3(700, 50, -650);
