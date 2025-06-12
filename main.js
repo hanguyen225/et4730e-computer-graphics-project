@@ -3,6 +3,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 const scene = new THREE.Scene();
+
+// Add a global ambient light to illuminate all objects
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Soft white light, intensity 0.5
+scene.add(ambientLight);
+
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 7000);
 
 const renderer = new THREE.WebGLRenderer();
@@ -1501,7 +1506,7 @@ function createBuilding(pos, size, color) {
     const geo = new THREE.BoxGeometry(size.x, size.y, size.z);
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true;
-    mesh.receiveShadow = true;
+             mesh.receiveShadow = true;
     mesh.position.set(pos.x, pos.y + size.y / 2, pos.z);
     return mesh;
 }
@@ -1892,6 +1897,16 @@ function animate() {
         const sunOrbitSpeed = (2 * Math.PI) / (60*3); // radians per second
         const elapsed = performance.now() * 0.001; // seconds
         sunPivot.rotation.z = elapsed * sunOrbitSpeed;
+
+        // --- Sync sunLight (DirectionalLight) with sunMesh position ---
+        // Get world position of sunMesh
+        sunMesh.updateMatrixWorld();
+        const sunWorldPos = new THREE.Vector3();
+        sunMesh.getWorldPosition(sunWorldPos);
+
+        sunLight.position.copy(sunWorldPos);
+        sunLight.target.position.set(300, 0, 300); // Point at scene center (adjust as needed)
+        sunLight.target.updateMatrixWorld();
     }
 }
 
