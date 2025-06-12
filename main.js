@@ -81,7 +81,10 @@ scene.add(ground);
 const roadGeometry = new THREE.BoxGeometry(1200, 200, 20);
 const roadMaterial = new THREE.MeshStandardMaterial({
     color: 0x333333, // Dark gray
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -4
     });
 const road1 = new THREE.Mesh(roadGeometry, roadMaterial);
 road1.rotation.x = -Math.PI / 2;
@@ -891,13 +894,13 @@ const createMedievalGate = (x, z, isRightSide) => {
     gateGroup.add(rightTorch);
 
     // Torch flames (point lights)
-    const leftLight = new THREE.PointLight(0xff6600, 1, 50);
-    leftLight.position.set(-gateWidth/2 + 20, entranceHeight/2 + 10, -entranceDepth/2 + 5);
-    gateGroup.add(leftLight);
+    // const leftLight = new THREE.PointLight(0xff6600, 1, 50);
+    // leftLight.position.set(-gateWidth/2 + 20, entranceHeight/2 + 10, -entranceDepth/2 + 5);
+    // gateGroup.add(leftLight);
     
-    const rightLight = new THREE.PointLight(0xff6600, 1, 50);
-    rightLight.position.set(gateWidth/2 - 20, entranceHeight/2 + 10, -entranceDepth/2 + 5);
-    gateGroup.add(rightLight);
+    // const rightLight = new THREE.PointLight(0xff6600, 1, 50);
+    // rightLight.position.set(gateWidth/2 - 20, entranceHeight/2 + 10, -entranceDepth/2 + 5);
+    // gateGroup.add(rightLight);
 
     // Position and rotate the entire gate
     gateGroup.position.set(x, 0, z);
@@ -1007,10 +1010,11 @@ createConnectingWall(450, 300, 450, 150, 150);
 createConnectingWall(450, 300, 450, 450, 150);
 
 // create a yard
-const yard = new THREE.BoxGeometry(600, 12, 600);
+const yard = new THREE.BoxGeometry(600 - 100, 12, 600 - 100);
 const yardMaterial = new THREE.MeshStandardMaterial({ color: 0xa3b18a });
 const yardMesh = new THREE.Mesh(yard, yardMaterial);
-yardMesh.position.set(300, 0, 300);
+yardMesh.position.set(300 + 50, 5, 300 + 50);
+yardMesh.receiveShadow = true; // <-- This enables shadow receiving
 scene.add(yardMesh);
 
 //TRAN_GIA_HUY
@@ -1415,11 +1419,11 @@ for (let i = 0; i < 2; i++) {
 }
 
 // 7. Ánh sáng môi trường cho helicopter
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-heli.add(hemiLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-dirLight.position.set(0, 50, 50);
-heli.add(dirLight);
+// const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+// heli.add(hemiLight);
+// const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+// dirLight.position.set(0, 50, 50);
+// heli.add(dirLight);
 
 // 8. Đặt vị trí & scale cao hơn helipad
 const helipadY = fifthFloorYBase + fifthFloorHeight + 10;
@@ -1508,22 +1512,22 @@ cityGroup.position.copy(basePos);
 
 // Only keep buildings that are on the ground plane (second quadrant, inside the square)
 // Building 1 (blue, faces outward: +Z)
-const blue = createBuilding(new THREE.Vector3(-150, 0, 400), new THREE.Vector3(80, 480, 80), 0x00ffff);
+const blue = createBuilding(new THREE.Vector3(-150, -50, 400), new THREE.Vector3(80, 480, 80), 0x00ffff);
 blue.rotation.y = Math.PI; // faces +Z (outward from city center)
 cityGroup.add(blue);
 
 // Building 2 (purple, faces outward: -X)
-const purple = createBuilding(new THREE.Vector3(-300, 0, 270), new THREE.Vector3(100, 520, 100), 0xff00ff);
+const purple = createBuilding(new THREE.Vector3(-300, -50, 270), new THREE.Vector3(100, 520, 100), 0xff00ff);
 purple.rotation.y = Math.PI ; // faces -X (outward)
 cityGroup.add(purple);
 
 // Building 3 (green, faces outward: -Z)
-const green = createBuilding(new THREE.Vector3(-520, 0, 300), new THREE.Vector3(70, 460, 70), 0x00ff99);
+const green = createBuilding(new THREE.Vector3(-520, -50, 300), new THREE.Vector3(70, 460, 70), 0x00ff99);
 green.rotation.y = Math.PI; // faces -Z (outward)
 cityGroup.add(green);
 
 // Building 4 (pink, faces outward: -X)
-const pink = createBuilding(new THREE.Vector3(-450, 0, 200), new THREE.Vector3(60, 540, 60), 0xff0099);
+const pink = createBuilding(new THREE.Vector3(-450, -50, 200), new THREE.Vector3(60, 540, 60), 0xff0099);
 pink.rotation.y = Math.PI; // faces -X (outward)
 cityGroup.add(pink);
 
@@ -1737,19 +1741,20 @@ const carSpline = new THREE.CatmullRomCurve3(carPathPoints, true);
 const sunLight = new THREE.DirectionalLight(0xffffff, 1.5); // Increased intensity
 sunLight.position.set(5, 10, 5); // Position the light like the sun
 sunLight.castShadow = true; // Enable shadows for the light
-sunLight.shadow.mapSize.width = 1024; // Shadow map resolution
-sunLight.shadow.mapSize.height = 1024;
+sunLight.shadow.mapSize.width = 2048; // Shadow map resolution
+sunLight.shadow.mapSize.height = 2048;
 sunLight.shadow.camera.near = 0.5;
-sunLight.shadow.camera.far = 50;
-sunLight.shadow.camera.left = -20;  // Extend the left boundary
-sunLight.shadow.camera.right = 20; // Extend the right boundary
-sunLight.shadow.camera.top = 20;   // Extend the top boundary
-sunLight.shadow.camera.bottom = -20; // Extend the bottom boundary
+sunLight.shadow.camera.far = 500;
+sunLight.shadow.camera.left = -200;  // Extend the left boundary
+sunLight.shadow.camera.right = 200; // Extend the right boundary
+sunLight.shadow.camera.top = 200;   // Extend the top boundary
+sunLight.shadow.camera.bottom = -200; // Extend the bottom boundary
+sunLight.shadow.bias = -0.005; // Try adjusting this value
 scene.add(sunLight);
 
 // Add Ambient Light
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Soft ambient light
-scene.add(ambientLight);
+//const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Soft ambient light
+//scene.add(ambientLight);
 
 // Camera position
 camera.position.set(-550, 1200, 0);
@@ -1889,5 +1894,36 @@ function animate() {
         sunPivot.rotation.z = elapsed * sunOrbitSpeed;
     }
 }
+
+// Utility: Recursively set shadow properties for all meshes in a group or mesh
+function setShadowsRecursive(object, cast = true, receive = true) {
+    object.traverse?.(child => {
+        if (child.isMesh) {
+            child.castShadow = cast;
+            child.receiveShadow = receive;
+        }
+    });
+    // For single meshes (not groups)
+    if (object.isMesh) {
+        object.castShadow = cast;
+        object.receiveShadow = receive;
+    }
+}
+sunLight.shadow.camera.left = -1000;
+sunLight.shadow.camera.right = 1000;
+sunLight.shadow.camera.top = 1000;
+sunLight.shadow.camera.bottom = -1000;
+sunLight.shadow.camera.near = 0.5;
+sunLight.shadow.camera.far = 5000;
+
+// --- Enable shadows for all big objects ---
+setShadowsRecursive(hieu_group, true, true);        // Castle and towers
+setShadowsRecursive(building, true, true);          // Central building
+setShadowsRecursive(giantHouseGroup, true, true);   // Giant house
+setShadowsRecursive(cityGroup, true, true);         // Neon city buildings
+setShadowsRecursive(gateGroup, true, true);         // City gate
+setShadowsRecursive(yardMesh, true, true);         // Yard only receives shadow
+
+// If you have other big groups, add them here as well
 
 renderer.setAnimationLoop(animate);
